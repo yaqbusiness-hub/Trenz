@@ -1,0 +1,27 @@
+# Routing contract: which signals pick the model for each step.
+# The router (scripts/route.py) implements these rules in code. Change both together.
+routing:
+  default: opus @ medium            # when unsure
+  rules:
+    classify | tag | extract         -> haiku  @ medium
+    search | read logs | summarize   -> haiku  @ medium   (read-only subagent)
+    scoped fix | spec-driven feature -> sonnet @ medium
+    everyday docs | repeated tasks   -> sonnet @ medium
+    multi-PR feature | debugging     -> opus   @ medium
+    images | computer use            -> opus   @ medium
+    migration | architecture         -> fable  @ medium
+    deep research | quant analysis   -> fable  @ medium
+escalation:
+  max_cycles: 3
+  order: [verify, effort, model]     # give the worker a check -> raise effort to high -> one model up at medium
+guards:
+  code_edits: never on haiku         # haiku workers have Edit/Write disallowed
+signals:
+  request: task type, scope, clear spec or open-ended
+  assets: images and screenshots, logs, amount of source material
+  repo: files and repos touched, failed cycles in TASK.md
+prices_usd_per_million_tokens:       # input / output, list prices from the routing guide; verify before relying on them
+  haiku-5.5:  [0.10, 0.50]           # prompts up to 100K tokens; 0.50 / 2.50 above that
+  sonnet-5.5: [2, 10]
+  opus-5.5:   [4, 20]
+  fable-5.2:  [8, 40]
